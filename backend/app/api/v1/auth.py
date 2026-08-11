@@ -9,6 +9,9 @@ from app.core.config import get_settings
 from app.schemas.auth import LoginRequest, TokenResponse
 from app.service.auth_service import login_user
 
+from app.api.dependencies import get_current_user
+from app.db.models.user import User
+
 router = APIRouter(
     prefix="/auth",
     tags=["Authentication"],
@@ -70,3 +73,16 @@ def login(
         access_token=access_token,
         refresh_token=refresh_token,
     )
+
+
+
+
+@router.get("/me")
+def get_me(
+    current_user: User = Depends(get_current_user),
+):
+    return {
+        "id": str(current_user.id),
+        "email": current_user.email,
+        "is_active": current_user.is_active,
+    }

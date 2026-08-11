@@ -1,2 +1,4 @@
 .venv
 ./__pycache__
+backend/app/api/v1/__pycache__/auth.cpython-312.pyc
+backend/app/api/__pycache__/
