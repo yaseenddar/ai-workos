@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 from enum import Enum
 
-from sqlalchemy import DateTime, Enum as SQLEnum, ForeignKey, func
+from sqlalchemy import DateTime, Enum as SQLEnum, ForeignKey, UniqueConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.session import Base
@@ -21,7 +21,8 @@ class Membership(Base):
         primary_key=True,
         default=uuid.uuid4,
     )
-
+    __table_args__ = (UniqueConstraint( "user_id", "organization_id", name="uq_membership_user_organization", ), )
+    
     user_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("users.id", ondelete="CASCADE"),
         nullable=False,
