@@ -25,3 +25,9 @@ class TokenResponse(BaseModel):
     access_token: str
     refresh_token: str
     token_type: str = "bearer"
+
+class OrganizationMemberResponse(BaseModel):
+    user_id: str
+    email: EmailStr
+    role: str
+    is_active: bool
