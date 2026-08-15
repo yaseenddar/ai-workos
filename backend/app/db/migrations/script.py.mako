@@ -24,5 +24,16 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    """Downgrade schema."""
-    ${downgrades if downgrades else "pass"}
+    op.drop_index(
+        op.f("ix_document_chunks_document_id"),
+        table_name="document_chunks",
+    )
+    op.drop_table("document_chunks")
+
+    op.drop_index(
+        op.f("ix_documents_organization_id"),
+        table_name="documents",
+    )
+    op.drop_table("documents")
+
+    op.execute("DROP TYPE documentstatus")
