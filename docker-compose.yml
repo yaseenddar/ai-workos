@@ -29,7 +29,12 @@ services:
     volumes:
       - minio_data:/data
     restart: unless-stopped
-
+  redis:
+    image: redis:7-alpine
+    container_name: ai-workos-redis
+    ports:
+      - "6379:6379"
+  restart: unless-stopped
 volumes:
   postgres_data:
   minio_data:

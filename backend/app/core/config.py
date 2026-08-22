@@ -6,7 +6,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     app_name: str = "AI WorkOS"
     environment: str = "development"
-
+    redis_url: str 
     database_url: str
 
     jwt_secret_key: str

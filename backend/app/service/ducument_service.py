@@ -1,9 +1,11 @@
 import uuid
 
 from sqlalchemy.orm import Session
+from app.workers.document_tasks import process_document
 
 from app.db.models.ducument import Document, DocumentStatus
 from app.storage.minio import MinioStorage
+from backend.app.workers.document_tasks import process_document
 
 
 class DocumentService:
@@ -49,6 +51,8 @@ class DocumentService:
 
             self.db.add(document)
             self.db.commit()
+
+            process_document.delay(str(document.id))
             self.db.refresh(document)
 
             return document
