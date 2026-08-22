@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
@@ -11,6 +12,8 @@ from app.service.auth_service import login_user
 
 from app.api.dependencies import get_current_user
 from app.db.models.user import User
+from app.db.models.membership import Membership
+from app.db.models.organization import Organization
 
 router = APIRouter(
     prefix="/auth",
@@ -80,9 +83,26 @@ def login(
 @router.get("/me")
 def get_me(
     current_user: User = Depends(get_current_user),
+    db:Session = Depends(get_db)
 ):
+    memberships = db.execute(
+        select(Membership,Organization)
+        .join(
+            Organization,
+            Membership.organization_id == Organization.id
+        )
+        .where(Membership.user_id == current_user.id)
+    ).all()
+    
     return {
         "id": str(current_user.id),
         "email": current_user.email,
         "is_active": current_user.is_active,
+        "organizations":[
+            {
+                "id" : str(org.id),
+                "name": org.name,
+                "role": membership.role.value,
+            } for membership,org in memberships
+        ]
     }

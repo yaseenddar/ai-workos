@@ -5,7 +5,6 @@ from app.workers.document_tasks import process_document
 
 from app.db.models.ducument import Document, DocumentStatus
 from app.storage.minio import MinioStorage
-from backend.app.workers.document_tasks import process_document
 
 
 class DocumentService:
@@ -51,9 +50,9 @@ class DocumentService:
 
             self.db.add(document)
             self.db.commit()
+            self.db.refresh(document) #refresh() guarantees SQLAlchemy reloads generated values before another process uses them.
 
             process_document.delay(str(document.id))
-            self.db.refresh(document)
 
             return document
 

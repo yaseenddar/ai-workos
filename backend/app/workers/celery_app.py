@@ -8,6 +8,7 @@ celery_app = Celery(
     "ai_workos",
     broker=settings.redis_url,
     backend=settings.redis_url,
+    include=["app.workers.document_tasks"],
 )
 
 celery_app.conf.update(

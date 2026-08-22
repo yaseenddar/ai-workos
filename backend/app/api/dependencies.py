@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi import Depends, FastAPI,Header, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jwt import InvalidTokenError
 from sqlalchemy import select
@@ -12,6 +12,7 @@ from app.db.models.user import User
 from app.db.session import get_db
 
 
+from app.db.models.membership import Membership
 bearer_scheme = HTTPBearer()
 # FastAPI
 #    │
@@ -103,3 +104,22 @@ def get_current_user(
 
     return user
 
+def require_member(
+    x_organization_id: UUID = Header(alias="X-Organization-ID"),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> Membership:
+    membership = db.scalar(
+        select(Membership).where(
+            Membership.organization_id == x_organization_id,
+            Membership.user_id == current_user.id,
+        )
+    )
+
+    if membership is None:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You are not a member of this organization.",
+        )
+
+    return membership
