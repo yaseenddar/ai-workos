@@ -1,26 +1,27 @@
-import fitz
+import fitz  # PyMuPDF
 
 
 class PDFParser:
 
-    @staticmethod
-    def extract_pages(pdf_bytes: bytes):
+    def parse(self, pdf_bytes: bytes) -> list[dict]:
+        """
+        Returns one dictionary per page.
+        """
 
         document = fitz.open(stream=pdf_bytes, filetype="pdf")
 
         pages = []
 
-        for index, page in enumerate(document):
+        try:
+            for page_number, page in enumerate(document, start=1):
+                pages.append(
+                    {
+                        "page_number": page_number,
+                        "text": page.get_text("text").strip(),
+                    }
+                )
 
-            text = page.get_text("text").strip()
+            return pages
 
-            pages.append(
-                {
-                    "page": index + 1,
-                    "text": text,
-                }
-            )
-
-        document.close()
-
-        return pages
+        finally:
+            document.close()

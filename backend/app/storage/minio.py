@@ -42,3 +42,19 @@ class MinioStorage:
 
     def delete_file(self, object_name: str):
         self.client.remove_object(self.bucket, object_name)
+        
+    def download_file(self, object_name: str) -> bytes:
+        response = None
+
+        try:
+            response = self.client.get_object(
+                bucket_name=self.bucket,
+                object_name=object_name,
+            )
+
+            return response.read()
+
+        finally:
+            if response is not None:
+                response.close()
+                response.release_conn()
