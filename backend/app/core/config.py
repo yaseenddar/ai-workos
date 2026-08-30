@@ -21,6 +21,9 @@ class Settings(BaseSettings):
     minio_bucket: str = "documents"
     minio_secure: bool = False
     
+    # embedding settings
+    embedding_model: str = "all-MiniLM-L6-v2"
+    
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
