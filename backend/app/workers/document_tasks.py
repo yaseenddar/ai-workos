@@ -7,6 +7,7 @@ from app.storage.minio import MinioStorage
 from app.ai.parser import PDFParser
 from app.ai.chunker import TextChunker
 from app.db.models import DocumentChunk
+from app.ai.tokenizer import count_tokens
 
 @celery_app.task(name="documents.process")
 def process_document(document_id: str):
@@ -51,7 +52,7 @@ def process_document(document_id: str):
                     chunk_index=chunk["chunk_index"],
                     page_number=chunk["page_number"],
                     content=chunk["content"],
-                    token_count=len(chunk["content"].split()),
+                    token_count=count_tokens(chunk["content"]),
                     embedding_id=None,
                     
                 )
@@ -60,6 +61,7 @@ def process_document(document_id: str):
         document.status = DocumentStatus.INDEXED
         db.commit()
         return {
+            "message": "Document processed successfully",
             "document_id": document_id,
             "status": document.status.value,
             "pages": len(pages),
