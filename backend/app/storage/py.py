@@ -1,4 +1,4 @@
-from .minio import MinioStorage
+from backend.minio import MinioStorage
 
 storage = MinioStorage()
 data = storage.download_file(

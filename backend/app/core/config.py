@@ -23,6 +23,7 @@ class Settings(BaseSettings):
     
     # embedding settings
     embedding_model: str = "all-MiniLM-L6-v2"
+    qdrant_url: str 
     
     model_config = SettingsConfigDict(
         env_file=".env",
