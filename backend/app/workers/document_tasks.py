@@ -1,3 +1,30 @@
+        #         DOCUMENT INGESTION
+        #                │
+        #                ▼
+        #             MinIO
+        #                │
+        #                ▼
+        #             Celery
+        #                │
+        #         ┌──────▼──────┐
+        #         │ PDF Parser  │
+        #         └──────┬──────┘
+        #                ▼
+        #             Chunker
+        #                │
+        #       ┌────────┴────────┐
+        #       ▼                 ▼
+        #  PostgreSQL        EmbeddingService
+        #  chunks                  │
+        #                          ▼
+        #                      VectorStore
+        #                          │
+        #                          ▼
+        #                       Qdrant
+        #                (org-filtered search)
+
+
+
 import uuid
 
 from app.workers.celery_app import celery_app
@@ -49,31 +76,44 @@ def process_document(document_id: str):
         chunker = TextChunker()
         chunks = chunker.chunk_pages(pages)
         
-        document_chunks = []
-        
-        print(f"Total chunks: {len(chunks)}")
-
-        for chunk in chunks:
-            document_chunk = DocumentChunk(
-                document_id=document.id,
-                chunk_index=chunk["chunk_index"],
-                page_number=chunk["page_number"],
-                content=chunk["content"],
-                token_count=count_tokens(
-                    chunk["content"]
-                ),
-                embedding_id=None,
+        # Idempotency in chunks if not already stored in the database
+        document_chunks = (
+            db.query(DocumentChunk)
+            .filter(
+            DocumentChunk.document_id == document.id
+            )
+            .order_by(DocumentChunk.chunk_index)
+            .all()
             )
 
-            db.add(document_chunk)
-            document_chunks.append(document_chunk)
-        db.commit()
-       # Make sure there is something to embed
         if not document_chunks:
-            raise ValueError(
-                "No text chunks were generated from the document"
-            )
+            for chunk in chunks:
+                document_chunk = DocumentChunk(
+                    document_id=document.id,
+                    chunk_index=chunk["chunk_index"],
+                    page_number=chunk["page_number"],
+                    content=chunk["content"],
+                    token_count=count_tokens(chunk["content"]),
+                    embedding_id=None,
+                )
 
+                db.add(document_chunk)
+
+            db.commit()
+
+            document_chunks = (
+                db.query(DocumentChunk)
+                .filter(
+                    DocumentChunk.document_id == document.id
+                )
+                .order_by(DocumentChunk.chunk_index)
+                .all()
+            )
+        else:
+            print(
+                f"Document {document_id} already has "
+                f"{len(document_chunks)} chunks stored in the database"
+            )
         # Extract chunk text
         texts = [
             chunk.content

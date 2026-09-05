@@ -1,5 +1,12 @@
 from qdrant_client import QdrantClient
-from qdrant_client.models import Distance, VectorParams
+from qdrant_client.models import (
+    Distance,
+    VectorParams,
+    PointStruct,
+    Filter,
+    FieldCondition,
+    MatchValue,
+)
 from uuid import UUID
 from qdrant_client.models import PointStruct
 
@@ -46,18 +53,29 @@ class VectorStore:
                 )
             ],
         )
-    def search(
-        self,
-        vector: list[float],
-        limit: int = 5,
-        ):
         
+# tenant isolation at the vector-search layer only 
+    def search(
+    self,
+    vector: list[float],
+    organization_id: UUID,
+    limit: int = 5,
+    ):
         return self.client.query_points(
             collection_name="document_chunks",
             query=vector,
+            query_filter=Filter(
+                must=[
+                    FieldCondition(
+                        key="organization_id",
+                        match=MatchValue(
+                            value=str(organization_id)
+                        ),
+                    )
+                ]
+            ),
             limit=limit,
-        ).points
-    
+        ).points    
     def upsert_many(
         self,
         chunk_ids: list[UUID],
