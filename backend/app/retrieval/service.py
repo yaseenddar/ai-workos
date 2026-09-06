@@ -1,7 +1,7 @@
 from uuid import UUID
 
 from sqlalchemy.orm import Session
-from app.db.models import RetrievedChunk
+from app.retrieval.models.retrieved_chunk import RetrievedChunk
 from app.db.models import DocumentChunk
 from app.embeddings.providers.sentence_transformer import (
     SentenceTransformerProvider,

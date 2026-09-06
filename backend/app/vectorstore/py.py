@@ -5,7 +5,7 @@ from app.embeddings.providers.sentence_transformer import SentenceTransformerPro
 from app.retrieval.service import RetrievalService
 from app.vectorstore.client import get_qdrant_client
 from app.vectorstore.store import VectorStore
-
+from app.context.builder import ContextBuilder
 
 db = SessionLocal()
 
@@ -34,14 +34,19 @@ try:
     for result in results:
         chunk = result.chunk
 
-        print("\n---")
-        print("Score:", result.score)
-        print("Chunk ID:", chunk.id)
-        print("Document ID:", chunk.document_id)
-        print("Chunk index:", chunk.chunk_index)
-        print("Page:", chunk.page_number)
-        print("Tokens:", chunk.token_count)
-        print("Content:", chunk.content[:300])
+        # print("\n---")
+        # print("Score:", result.score)
+        # print("Chunk ID:", chunk.id)
+        # print("Document ID:", chunk.document_id)
+        # print("Chunk index:", chunk.chunk_index)
+        # print("Page:", chunk.page_number)
+        # print("Tokens:", chunk.token_count)
+        # print("Content:", chunk.content[:300])
+        
+        context_builder = ContextBuilder()
 
+        context = context_builder.build(results)
+
+        print(context)
 finally:
     db.close()
