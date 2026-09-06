@@ -1,8 +1,9 @@
 from uuid import UUID
 
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
+
+from app.db.models import Document, DocumentChunk
 from app.retrieval.models.retrieved_chunk import RetrievedChunk
-from app.db.models import DocumentChunk
 from app.embeddings.providers.sentence_transformer import (
     SentenceTransformerProvider,
 )
@@ -27,6 +28,7 @@ class RetrievalService:
         organization_id: UUID,
         limit: int = 5,
     ) -> list[RetrievedChunk]:
+
         # 1. Convert the user's query into an embedding
         query_vector = self.embedding_service.embed_text(
             query
@@ -48,11 +50,17 @@ class RetrievalService:
             for result in results
         ]
 
-        # 4. Fetch the authoritative chunk records
+        # 4. Fetch authoritative chunks + their documents
         chunks = (
             self.db.query(DocumentChunk)
+            .options(
+                selectinload(DocumentChunk.document)
+            )
             .filter(
-                DocumentChunk.id.in_(chunk_ids)
+                DocumentChunk.id.in_(chunk_ids),
+                DocumentChunk.document.has(
+                    Document.organization_id == organization_id
+                ),
             )
             .all()
         )
@@ -64,7 +72,7 @@ class RetrievalService:
         }
 
         # 6. Preserve Qdrant's relevance order
-        retrieved_chunks = list[RetrievedChunk]()
+        retrieved_chunks: list[RetrievedChunk] = []
 
         for result in results:
             chunk_id = UUID(
@@ -82,5 +90,5 @@ class RetrievalService:
                     score=result.score,
                 )
             )
-
-        return retrieved_chunks
+        
+        return retrieved_chunks 

@@ -1,52 +1,68 @@
-import uuid
-
+from app.context.builder import ContextBuilder
 from app.db.session import SessionLocal
-from app.embeddings.providers.sentence_transformer import SentenceTransformerProvider
+from app.embeddings.providers.sentence_transformer import (
+    SentenceTransformerProvider,
+)
+from app.llm.gimini import GeminiProvider
+from app.rag.service import RAGService
 from app.retrieval.service import RetrievalService
 from app.vectorstore.client import get_qdrant_client
 from app.vectorstore.store import VectorStore
-from app.context.builder import ContextBuilder
 
 db = SessionLocal()
 
-try:
-    embedding_service = SentenceTransformerProvider()
-    vector_store = VectorStore(get_qdrant_client())
+embedding_service = SentenceTransformerProvider()
 
-    retrieval_service = RetrievalService(
-        db=db,
-        embedding_service=embedding_service,
-        vector_store=vector_store,
-    )
+vector_store = VectorStore(
+    get_qdrant_client()
+)
 
-    # organization_id = uuid.UUID(
-    #     "23aee910-ddf8-41ac-a25d-cfed61658639"
-    # )
+retrieval_service = RetrievalService(
+    db=db,
+    embedding_service=embedding_service,
+    vector_store=vector_store,
+)
 
-    results = retrieval_service.retrieve(
-        query="What is the purpose of the forwardRef function in React?",
+context_builder = ContextBuilder()
+
+llm = GeminiProvider()
+
+rag = RAGService(
+    retrieval_service=retrieval_service,
+    context_builder=context_builder,
+    llm=llm,
+)
+
+questions = [
+    "What frontend technologies does the developer use?",
+    "What company does the developer currently work for?",
+    "What is SecurePay?",
+    "What is JSX?",
+    "Explain React hooks.",
+    "Who is the developer?",
+    "What database technologies are mentioned?",
+    "Who was the first president of the United States?",
+]
+
+for question in questions:
+    print("=" * 80)
+    print(f"QUESTION: {question}")
+
+    answer = rag.answer(
+        question=question,
         organization_id="23aee910-ddf8-41ac-a25d-cfed61658639",
-        limit=5,
     )
 
-    print(f"Results: {len(results)}")
+    print("\nANSWER:")
+    print(answer.answer)
 
-    for result in results:
-        chunk = result.chunk
+    print("\nSOURCES:")
+    for source in answer.sources:
+        print(
+            f"- {source.document_name} | "
+            f"Page {source.page_number} | "
+            f"Score {source.score}"
+        )
 
-        # print("\n---")
-        # print("Score:", result.score)
-        # print("Chunk ID:", chunk.id)
-        # print("Document ID:", chunk.document_id)
-        # print("Chunk index:", chunk.chunk_index)
-        # print("Page:", chunk.page_number)
-        # print("Tokens:", chunk.token_count)
-        # print("Content:", chunk.content[:300])
-        
-        context_builder = ContextBuilder()
-
-        context = context_builder.build(results)
-
-        print(context)
-finally:
-    db.close()
+    print()
+db.close()

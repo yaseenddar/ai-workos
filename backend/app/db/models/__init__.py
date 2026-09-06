@@ -4,6 +4,5 @@ from app.db.models.user import User
 from app.db.models.activation import OrganizationInvitation
 from app.db.models.ducument import Document, DocumentStatus
 from app.db.models.document_chunk import DocumentChunk
-from backend.app.retrieval.models.retrieved_chunk import RetrievedChunk
 
-__all__ = [ "Organization", "User", "Membership", "MembershipRole", "OrganizationInvitation", "Document", "DocumentStatus", "DocumentChunk", "RetrievedChunk" ]
+__all__ = [ "Organization", "User", "Membership", "MembershipRole", "OrganizationInvitation", "Document", "DocumentStatus", "DocumentChunk"]

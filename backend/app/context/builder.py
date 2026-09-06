@@ -1,4 +1,4 @@
-from app.retrieval.models import RetrievedChunk
+from app.retrieval.models.retrieved_chunk import RetrievedChunk
 
 
 class ContextBuilder:
