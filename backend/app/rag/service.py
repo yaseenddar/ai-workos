@@ -32,7 +32,11 @@ class RAGService:
             organization_id=organization_id,
             limit=limit,
         )
-
+        if not retrieved_chunks:
+            return RAGResponse(
+                answer="I couldn't find the answer in the provided documents.",
+                sources=[],
+            )
         # 2. Build context for the LLM
         context = self.context_builder.build(
             retrieved_chunks
