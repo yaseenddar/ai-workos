@@ -8,7 +8,6 @@ from qdrant_client.models import (
     MatchValue,
 )
 from uuid import UUID
-from qdrant_client.models import PointStruct
 
 class VectorStore:
 

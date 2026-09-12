@@ -10,9 +10,20 @@ from app.core.config import get_settings
 from app.core.security import decode_token
 from app.db.models.user import User
 from app.db.session import get_db
-
-
 from app.db.models.membership import Membership
+
+
+from app.context.builder import ContextBuilder
+from app.embeddings.providers.sentence_transformer import (
+    SentenceTransformerProvider,)
+
+from app.llm.gimini import GeminiProvider
+from app.rag.service import RAGService
+from app.reranking.provider.cross_encoder import CrossEncoderReranker
+from app.vectorstore.client import get_qdrant_client
+from app.vectorstore.store import VectorStore
+from app.retrieval.service import RetrievalService
+
 bearer_scheme = HTTPBearer()
 # FastAPI
 #    │
@@ -123,3 +134,32 @@ def require_member(
         )
 
     return membership
+
+def get_rag_service(
+    db: Session = Depends(get_db),
+) -> RAGService:
+
+    embedding_service = SentenceTransformerProvider()
+
+    vector_store = VectorStore(
+        get_qdrant_client()
+    )
+
+    reranker = CrossEncoderReranker()
+
+    retrieval_service = RetrievalService(
+        db=db,
+        embedding_service=embedding_service,
+        vector_store=vector_store,
+        reranker=reranker,
+    )
+
+    context_builder = ContextBuilder()
+
+    llm = GeminiProvider()
+
+    return RAGService(
+        retrieval_service=retrieval_service,
+        context_builder=context_builder,
+        llm=llm,
+    )

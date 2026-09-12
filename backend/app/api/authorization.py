@@ -5,6 +5,7 @@ from fastapi import Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+
 from app.api.dependencies import get_current_user
 from app.db.models.membership import Membership, MembershipRole
 from app.db.models.user import User
@@ -16,7 +17,7 @@ def get_membership(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> Membership:
-
+    
     membership = db.scalar(
         select(Membership).where(
             Membership.user_id == current_user.id,

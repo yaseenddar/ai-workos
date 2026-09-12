@@ -10,7 +10,6 @@ from app.schemas.invitation import (
 )
 from app.service.invitation_service import create_invitation
 
-
 router = APIRouter(
     prefix="/organizations/invitations",
     tags=["Invitations"],

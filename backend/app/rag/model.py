@@ -1,6 +1,12 @@
 from dataclasses import dataclass
 from uuid import UUID
 
+from pydantic import BaseModel
+
+
+class RAGQueryRequest(BaseModel):
+    question: str
+
 
 @dataclass
 class Source:
