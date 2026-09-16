@@ -6,4 +6,4 @@ from app.db.models import DocumentChunk
 @dataclass
 class RetrievedChunk:
     chunk: DocumentChunk
-    score: float
+    retrieval_score: float

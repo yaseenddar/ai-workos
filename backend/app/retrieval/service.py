@@ -120,10 +120,10 @@ class RetrievalService:
             result = candidate_results[index]
 
             retrieved_chunks.append(
-                RetrievedChunk(
-                    chunk=chunk,
-                    score=result.score,
-                )
+               RetrievedChunk(
+                chunk=chunk,
+                retrieval_score=result.score,
+            )
             )
 
         return retrieved_chunks

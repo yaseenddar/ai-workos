@@ -13,7 +13,7 @@ class Source:
     document_id: UUID
     document_name: str
     page_number: int
-    score: float
+    retrieval_score: float
 
 
 @dataclass

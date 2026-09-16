@@ -4,15 +4,15 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    app_name: str = "AI WorkOS"
-    environment: str = "development"
+    app_name: str 
+    environment: str 
     redis_url: str 
     database_url: str
 
     jwt_secret_key: str
-    jwt_algorithm: str = "HS256"
-    access_token_expire_minutes: int = 15
-    refresh_token_expire_days: int = 7
+    jwt_algorithm: str 
+    access_token_expire_minutes: int 
+    refresh_token_expire_days: int 
 
     # minio settings
     minio_endpoint: str
@@ -22,13 +22,13 @@ class Settings(BaseSettings):
     minio_secure: bool = False
     
     # embedding settings
-    embedding_model: str = "all-MiniLM-L6-v2"
+    embedding_model: str
     qdrant_url: str 
     
     # llm settings
     # LLM settings
     gemini_api_key: str
-    gemini_model: str = "gemini-2.5-flash"
+    gemini_model: str 
     
     
     model_config = SettingsConfigDict(
